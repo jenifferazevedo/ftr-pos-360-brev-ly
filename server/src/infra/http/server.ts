@@ -15,6 +15,8 @@ import { healthCheck } from './routes/health-check'
 import { createLinkRoute } from './routes/create-link'
 import { accessLinkRoute } from './routes/access-link'
 import { deleteLinkRoute } from './routes/delete-link'
+import { exportLinksCSVRoute } from './routes/export-links-csv'
+import apiRoutes from './routes'
 
 const server = fastify()
 
@@ -46,14 +48,10 @@ server.register(fastifySwagger, {
 })
 
 server.register(fastifySwaggerUi, {
-  routePrefix: '/docs',
+  routePrefix: '/api/docs',
 })
 
-server.register(healthCheck)
-server.register(getLinksRoute)
-server.register(createLinkRoute)
-server.register(accessLinkRoute)
-server.register(deleteLinkRoute)
+server.register(apiRoutes, { prefix: '/api'})
 
 server.listen({ port: env.PORT, host: '0.0.0.0' }).then(() => {
   console.log('HTTP Server running!')
