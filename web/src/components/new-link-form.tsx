@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { WarningIcon } from '@phosphor-icons/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -6,14 +7,17 @@ import type { LinkSummary } from '../models/link.interface';
 import { isShortLinkValid } from '../utils/is-short-link-valid';
 import { createLink } from '../services/link.service';
 import { LoadingSpinner } from './ui/loading-spinner';
+import { ToastNotification } from './toast-notification';
+import { errorNotification } from '../utils/notification-messages';
 
 function validateShortLinkInput(value?: string) {
   const message = 'Informe uma url minúscula e sem espaços/caracter especial'
   if (!value) return message;
   return isShortLinkValid(value) || message;
 }
-
 export function NewLinkForm() {
+  const [openNotification, setOpenNotification] = useState(false);
+  const [errorStatus, setErrorStatus] = useState<number | undefined>();
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -23,7 +27,8 @@ export function NewLinkForm() {
       reset(); 
     },
     onError: (error: AxiosError) => {
-      console.log(error);
+      setErrorStatus(error.status)
+      setOpenNotification(true)
     }
   });
   const {
@@ -34,6 +39,11 @@ export function NewLinkForm() {
   } = useForm<LinkSummary>();
 
   const onSubmit = (data: LinkSummary) => mutate(data);
+
+  const closeNotification = () => {
+    setOpenNotification(false);
+    setErrorStatus(undefined);
+  }
 
   return (
       <div className="w-full p-8 rounded-2xl bg-gray-100 flex flex-col gap-5" style={{ minWidth: '360px', maxWidth: '380px' }}>
@@ -78,6 +88,13 @@ export function NewLinkForm() {
               Salvar link
             </button>
           </form>
+          <ToastNotification 
+            title={errorStatus === 409 ? errorNotification.forms[409].title : errorNotification.global[500].title} 
+            description={errorStatus === 409 ? errorNotification.forms[409].description : errorNotification.global[500].description} 
+            open={openNotification}
+            onOpenChange={closeNotification}
+            type='error' 
+          />
         </div>
   );
 }
