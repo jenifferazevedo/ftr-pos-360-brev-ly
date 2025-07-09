@@ -12,6 +12,9 @@ import {
 } from 'fastify-type-provider-zod'
 import { getLinksRoute } from './routes/get-links'
 import { healthCheck } from './routes/health-check'
+import { createLinkRoute } from './routes/create-link'
+import { accessLinkRoute } from './routes/access-link'
+import { deleteLinkRoute } from './routes/delete-link'
 
 const server = fastify()
 
@@ -48,6 +51,9 @@ server.register(fastifySwaggerUi, {
 
 server.register(healthCheck)
 server.register(getLinksRoute)
+server.register(createLinkRoute)
+server.register(accessLinkRoute)
+server.register(deleteLinkRoute)
 
 server.listen({ port: env.PORT, host: '0.0.0.0' }).then(() => {
   console.log('HTTP Server running!')
